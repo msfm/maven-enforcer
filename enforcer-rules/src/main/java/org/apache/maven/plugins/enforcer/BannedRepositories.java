@@ -95,8 +95,9 @@ public class BannedRepositories
                 checkRepositories( project.getPluginArtifactRepositories(), this.allowedPluginRepositories,
                                    this.bannedPluginRepositories );
 
-            String repoErrMsg = populateErrorMessage( resultBannedRepos, " " );
-            String pluginRepoErrMsg = populateErrorMessage( resultBannedPluginRepos, " plugin " );
+            String repoErrMsg = populateErrorMessage( resultBannedRepos, " ", this.bannedRepositories );
+            String pluginRepoErrMsg = populateErrorMessage( resultBannedPluginRepos, " plugin ",
+                                   this.bannedPluginRepositories );
 
             String errMsg = repoErrMsg + pluginRepoErrMsg;
 
@@ -190,14 +191,16 @@ public class BannedRepositories
         return text.matches( pattern.replace( "?", ".?" ).replace( "*", ".*?" ) );
     }
 
-    private String populateErrorMessage( List<ArtifactRepository> resultBannedRepos, String errorMessagePrefix )
+    private String populateErrorMessage( List<ArtifactRepository> resultBannedRepos, String errorMessagePrefix,
+                                         List<String> excludes )
     {
         StringBuffer errMsg = new StringBuffer( "" );
         if ( !resultBannedRepos.isEmpty() )
         {
-            errMsg.append( "Current maven session contains banned" + errorMessagePrefix
-                + "repository urls, please double check your pom or settings.xml:" + System.lineSeparator()
-                + getRepositoryUrlString( resultBannedRepos ) + System.lineSeparator() + System.lineSeparator() );
+            errMsg.append( System.lineSeparator() + "Current maven session contains the following banned"
+                + errorMessagePrefix + "repository urls which match " + excludes + ". "
+                + "Please double check your pom or settings.xml:" + System.lineSeparator()
+                + getRepositoryUrlString( resultBannedRepos ) + System.lineSeparator() );
         }
 
         return errMsg.toString();
@@ -208,7 +211,7 @@ public class BannedRepositories
         StringBuffer urls = new StringBuffer( "" );
         for ( ArtifactRepository repo : resultBannedRepos )
         {
-            urls.append( repo.getId() + " - " + repo.getUrl() + System.lineSeparator() );
+            urls.append( " - " + repo.getId() + ": " + repo.getUrl() + System.lineSeparator() );
         }
         return urls.toString();
     }
